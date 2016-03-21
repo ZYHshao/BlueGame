@@ -8,6 +8,7 @@
 
 #import <UIKit/UIKit.h>
 #import "TipButton.h"
+#import "BlueToothTool.h"
 @protocol GameViewDelegate<NSObject>
 -(void)gameViewClick:(NSString *)index;
 @end
@@ -16,5 +17,6 @@
 //存放所有棋格
 @property(nonatomic,strong)NSMutableArray<TipButton *> * tipArray;
 @property(nonatomic,weak)id<GameViewDelegate>delegate;
+//进行下子
 -(void)setTipIndex:(int)index;
 @end

@@ -7,7 +7,6 @@
 //
 
 #import "BlueToothTool.h"
-#import <UIKit/UIKit.h>
 @implementation BlueToothTool
 {
     //外设管理中心
@@ -29,9 +28,9 @@
     //要交互的外设属性
     CBCharacteristic * _centerReadChara;
     CBCharacteristic * _centerWriteChara;
-    
     void(^block)(BOOL first);
 }
+//实现单例方法
 +(instancetype)sharedManager{
     static BlueToothTool *tool = nil;
     static dispatch_once_t predicate;
@@ -40,6 +39,7 @@
     });
     return tool;
 }
+//实现创建游戏的方法
 -(void)setUpGame:(NSString *)name block:(void (^)(BOOL))finish{
     block = [finish copy];
     if (_peripheralManager==nil) {
@@ -52,11 +52,12 @@
         _ser.characteristics = @[_readChara,_writeChara];
         _peripheralManager = [[CBPeripheralManager alloc]initWithDelegate:self queue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)];
     }
+    //设置为房主
     _isCentral=YES;
     //开始广播广告
     [_peripheralManager startAdvertising:@{CBAdvertisementDataLocalNameKey:@"WUZIGame"}];
 }
-
+//外设检测蓝牙状态
 -(void)peripheralManagerDidUpdateState:(CBPeripheralManager *)peripheral{
     //判断是否可用
     if (peripheral.state==CBPeripheralManagerStatePoweredOn) {
@@ -65,6 +66,7 @@
         //开始广播广告
         [_peripheralManager startAdvertising:@{CBAdvertisementDataLocalNameKey:@"WUZIGame"}];
     }else{
+        //弹提示框
         dispatch_async(dispatch_get_main_queue(), ^{
         [self showAlert];
         });
@@ -90,8 +92,6 @@
             [[[UIApplication sharedApplication].delegate window]addSubview:_waitOtherView];
         });
     }
-   
-   
 }
 
 
@@ -112,29 +112,26 @@
             [_waitOtherView removeFromSuperview];
             [alert show];
         });
-
     }
 }
+//收到写消息后的回调
 -(void)peripheralManager:(CBPeripheralManager *)peripheral didReceiveWriteRequests:(NSArray<CBATTRequest *> *)requests{
     dispatch_async(dispatch_get_main_queue(), ^{
         [self.delegate getData:[[NSString alloc]initWithData:requests.firstObject.value encoding:NSUTF8StringEncoding]];
     });
-
-    
 }
+//弹提示框的方法
 -(void)showAlert{
     UIAlertView * alert = [[UIAlertView alloc]initWithTitle:@"温馨提示" message:@"请确保您的蓝牙可用" delegate:nil cancelButtonTitle:@"好的" otherButtonTitles:nil, nil];
     [alert show];
 }
 //===============================================================
 -(void)searchGame{
-    
     if (_centerManger==nil) {
         _centerManger = [[CBCentralManager alloc]initWithDelegate:self queue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0)];
     }else{
         [_centerManger scanForPeripheralsWithServices:nil options:nil];
         if (_searchGameView==nil) {
-            
             _searchGameView = [[UIView alloc]initWithFrame:CGRectMake([UIScreen mainScreen].bounds.size.width/2-100, 240, 200, 100)];
             UILabel * label = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, 200, 100)];
             label.backgroundColor = [UIColor clearColor];
@@ -147,8 +144,8 @@
             [_searchGameView removeFromSuperview];
             [[[UIApplication sharedApplication].delegate window]addSubview:_searchGameView];
         }
-        
     }
+    //设置为游戏加入方
     _isCentral = NO;
 }
 //设备硬件检测状态回调的方法 可用后开始扫描设备
@@ -249,13 +246,13 @@
 }
 
 -(void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+    //告诉开发者先后手信息
     if (buttonIndex==0) {
         if (_isCentral) {
             block(1);
         }else{
             block(0);
         }
-        
     }else{
         if (_isCentral) {
             block(0);
@@ -264,13 +261,14 @@
         }
     }
 }
-
+//断开连接
 -(void)disConnect{
     if (!_isCentral) {
         [_centerManger cancelPeripheralConnection:_peripheral];
       [_peripheral setNotifyValue:NO forCharacteristic:_centerReadChara];
     }
 }
+//写数据
 -(void)writeData:(NSString *)data{
     if (_isCentral) {
         [_peripheralManager updateValue:[data dataUsingEncoding:NSUTF8StringEncoding] forCharacteristic:_readChara onSubscribedCentrals:nil];

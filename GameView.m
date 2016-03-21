@@ -7,8 +7,8 @@
 //
 
 #import "GameView.h"
-#import "TipButton.h"
-#import "BlueToothTool.h"
+
+
 @implementation GameView
 
 - (instancetype)initWithFrame:(CGRect)frame
@@ -40,10 +40,10 @@
     if (btn.hasChess==0) {
         //下子
         [btn dropChess:YES];
+        //进行胜负判定
         [self cheak];
         [self.delegate gameViewClick:[NSString stringWithFormat:@"%d",btn.index]];
     }
-    
 }
 //进行胜负判定
 -(void)cheak{
@@ -56,7 +56,6 @@
         UIAlertView * alert = [[UIAlertView alloc]initWithTitle:@"您失败了" message:@"" delegate:self cancelButtonTitle:@"好的" otherButtonTitles:nil, nil];
         [alert show];
     }
-    
 }
 -(void)setTipIndex:(int)index{
     //下子

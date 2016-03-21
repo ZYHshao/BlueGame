@@ -22,10 +22,11 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.view.backgroundColor = [UIColor brownColor];
+    //创建游戏视图
     _view = [[GameView alloc]initWithFrame:CGRectMake(20, 40, (self.view.frame.size.width-40), (self.view.frame.size.width-40)/12*20)];
     _view.delegate=self;
     [self.view addSubview:_view];
-    
+    //创建背景视图
     _bgView = [[UIView alloc]initWithFrame:self.view.frame];
     _bgView.backgroundColor = [UIColor colorWithRed:1 green:1 blue:1 alpha:0.1];
     UIButton * btn = [UIButton buttonWithType:UIButtonTypeSystem];
@@ -42,12 +43,12 @@
     [_bgView addSubview:btn2];
     
     [self.view addSubview:_bgView];
+    //设置蓝牙通讯类代理
     [BlueToothTool sharedManager].delegate=self;
-    
+    //创建提示标签
     _tipLabel = [[UILabel alloc]initWithFrame:CGRectMake(0, 0, self.view.frame.size.width,40)];
     [self.view addSubview:_tipLabel];
     _tipLabel.textAlignment = NSTextAlignmentCenter;
-    
 }
 -(void)creatGame{
     [[BlueToothTool sharedManager]setUpGame:@"" block:^(BOOL first) {
